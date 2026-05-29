@@ -66,20 +66,31 @@ class IOEventHandler(EventHandler):
 
         self._o_eventq = Queue()
         self._keys_pressed = set()
-
+        # For the instance manager to not
+        # overload the stack.
+        self._is_processing = False
         super().__init__(events)
     
+    @property 
+    def is_processing(self):
+        return self._is_processing
+    
+    def _set_processing(self, state: bool):
+        self._is_processing = state
+
     def process(self):
         if self._o_eventq.empty():
             # TODO: warning log that it tried to process something empty
             return 
 
         o_event = self._o_eventq.get()
-        
+        self._set_processing(True) 
+
         # TODO: Logic for processing event outputs
         for koa in o_event.outputSeq():
             ...
             
+        self._set_processing(False)
 
     def on_press(self, key):
         self._keys_pressed.add(key)
